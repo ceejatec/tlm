@@ -38,4 +38,4 @@ RUN set -x \
 
 CMD . ./miniforge3-${MINIFORGE_VERSION}/bin/activate \
     && conda activate cbpy \
-    && conda list
+    && conda env export

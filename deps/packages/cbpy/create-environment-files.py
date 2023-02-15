@@ -10,7 +10,7 @@ be governed by the Apache License, Version 2.0, included in the file
 licenses/APL2.txt.
 """
 
-# This script is responsible for reading the files in ./platforms and writing
+# This script is responsible for reading the files in ./package-lists and writing
 # the relevant info to the various ../environment-${platform}.txt files
 #
 # If it encounters issues in ../couchbase-server-black-duck-manifest.yaml it
@@ -89,7 +89,7 @@ def inject_template(f, template, lines_before=1, lines_after=1):
 
 def write_environment_files(deps):
     """ Write the various environment files """
-    # Write environment-base
+
     for platform in platforms:
         platform_specific_deps = []
         with open(f"environment-{platform}.txt", "w") as f:
