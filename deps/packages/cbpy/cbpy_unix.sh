@@ -52,7 +52,7 @@ conda install -y \
     --override-channels --strict-channel-priority \
     --file "${SRC_DIR}/cb-dependencies.txt" \
     --file "${SRC_DIR}/cb-dependencies-${platform}.txt" \
-    --file "${SRC_DIR}/cb-dependences-stubs.txt"
+    --file "${SRC_DIR}/cb-dependencies-stubs.txt"
 
 # Remove gmp (pycryptodome soft dep)
 if conda list -n cbpy gmp | grep gmp
