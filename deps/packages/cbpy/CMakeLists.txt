@@ -25,6 +25,7 @@ ENDIF ()
 
 SET (_install_dir "${CMAKE_BINARY_DIR}/install")
 FILE (TO_NATIVE_PATH "${_install_dir}" _install_dir)
+FILE (TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}" _source_dir)
 
 # We abuse the DOWNLOAD step here to grab cbdep for us. cbdep knows the
 # vagaries of downloading and installing a local Miniforge to kickstart
@@ -38,8 +39,7 @@ ExternalProject_Add(cbpy
   URL "${_cbdep_url_base}${_cbdep_url_ext}"
   DOWNLOAD_NO_EXTRACT true
   CONFIGURE_COMMAND ""
-  BUILD_COMMAND "${_build_script}" "${CMAKE_CURRENT_SOURCE_DIR}" <DOWNLOADED_FILE> ${MINIFORGE_VERSION} <INSTALL_DIR>
-  INSTALL_DIR "${_install_dir}"
+  BUILD_COMMAND "${_build_script}" "${_source_dir}" <DOWNLOADED_FILE> ${MINIFORGE_VERSION} "${_install_dir}"
   INSTALL_COMMAND ""
 )
 

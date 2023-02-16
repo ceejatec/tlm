@@ -25,7 +25,9 @@ call conda install -y ^
   -n cbpy ^
   -c ./conda-pkgs -c conda-forge ^
   --override-channels --strict-channel-priority ^
-  --file "%SRC_DIR%/environment-win.txt" || goto error
+  --file %SRC_DIR%\cb-dependencies.txt ^
+  --file %SRC_DIR%\cb-dependencies-win.txt ^
+  --file %SRC_DIR%\cb-dependencies-stubs.txt || goto error
 
 rem Remove gmp (pycryptodome soft dep)
 call conda list -n cbpy gmp | findstr gmp
@@ -33,13 +35,18 @@ if %ERRORLEVEL% EQU 0 call conda remove -n cbpy gmp -y --force
 
 rem Pack cbpy and then unpack into final dir
 call conda pack -n cbpy --output cbpy.tar || goto error
-call conda deactivate || goto error
 rmdir /s /q %INSTALL_DIR%
 mkdir %INSTALL_DIR%
 set TARBALL=%CD%\cbpy.tar
 pushd %INSTALL_DIR%
 cmake -E tar xf %TARBALL%
 del %TARBALL%
+
+rem Save the environment for future reference
+mkdir env
+call conda list -n cbpy > env/environment-win.txt || goto error
+call conda env export -n cbpy > env/environment-win.yml || goto error
+call conda deactivate || goto error
 
 rem Prune installation
 dir
@@ -64,7 +71,7 @@ popd
 
 rem Quick installation test - we need to emulate the py-wrapper.c approach
 rem and add Library\bin to PATH for the C-linked libraries to work
-set PATH=%INSTALL_DIR%\Library\bin
+set PATH=%INSTALL_DIR%\Library\bin:%PATH%
 %INSTALL_DIR%\python.exe "%SRC_DIR%/test_cbpy.py" || goto error
 
 goto :eof

@@ -32,10 +32,7 @@ fi
 conda install -y conda-build conda-pack conda-verify
 
 # Build our local packages and stubs per platform.
-if [ -d "${SRC_DIR}/conda-pkgs/${platform}" ]; then
-    conda build --output-folder "./conda-pkgs" "${SRC_DIR}/conda-pkgs/${platform}/*"
-fi
-for subdir in all stubs
+for subdir in ${platform} all stubs
 do
     if [ "$(ls ${SRC_DIR}/conda-pkgs/${subdir})" ]
     then
@@ -53,7 +50,9 @@ conda install -y \
     -n cbpy \
     -c ./conda-pkgs -c conda-forge \
     --override-channels --strict-channel-priority \
-    --file "${SRC_DIR}/environment-${platform}.txt"
+    --file "${SRC_DIR}/cb-dependencies.txt" \
+    --file "${SRC_DIR}/cb-dependencies-${platform}.txt" \
+    --file "${SRC_DIR}/cb-dependences-stubs.txt"
 
 # Remove gmp (pycryptodome soft dep)
 if conda list -n cbpy gmp | grep gmp
@@ -63,13 +62,16 @@ fi
 
 # Pack cbpy and then unpack into final dir
 conda pack -n cbpy --output cbpy.tar
-conda deactivate
 mkdir -p "${INSTALL_DIR}"
 tar xf cbpy.tar -C "${INSTALL_DIR}"
 rm cbpy.tar
 
-# Prune installation
+# Save the environment for future reference
 pushd "${INSTALL_DIR}"
+mkdir env
+conda list -n cbpy > env/environment-${platform}.txt
+conda env export -n cbpy > env/environment-${platform}.yml
+conda deactivate
 
 # Ensure lib files are codesigned on Mac so that they can be loaded.
 # Maybe we need to expand this to Mac x86_64.
@@ -85,6 +87,7 @@ set +e
  fi
 set -e
 
+# Prune installation
 rm -rf compiler_compat conda-meta include \
     lib/cmake lib/pkgconfig \
     lib/itcl* lib/tcl* lib/tk* \
@@ -96,7 +99,6 @@ cd bin
 rm [0-9a-or-z]* pydoc* py*config
 
 popd
-
 
 # Quick installation test
 "${INSTALL_DIR}/bin/python" "${SRC_DIR}/test_cbpy.py"
